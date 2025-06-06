@@ -29,7 +29,19 @@ type Response struct {
 // TODO: move to config if needed
 const aliasLength = 6
 
+// // вызов другой библиотеки генерации моков
+//go::generate mockgen -source=save.go -destination=mocks/URLSaver.go
+
+// //не работает. По моему очень капризная или вообще не для windows .
+// // В других проектах буду использовать gomock
+//
+// // docker run -v "$PWD":/src -w /src vektra/mockery:3
+// // On PS: все, бросил, очень запутанная (06.06.2025)
+// // docker run -v ${PWD}:/src -w /src vektra/mockery:3
+// // docker run -v ${PWD}:/src -w /src vektra/mockery --all
+
 //go:generate go run github.com/vektra/mockery/v2@v2.28.2 --name=URLSaver
+
 type URLSaver interface {
 	SaveURL(urlToSave string, alias string) (int64, error)
 }
