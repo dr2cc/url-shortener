@@ -75,19 +75,21 @@ func TestSaveHandler(t *testing.T) {
 			input := fmt.Sprintf(`{"url": "%s", "alias": "%s"}`, tc.url, tc.alias)
 
 			req, err := http.NewRequest(http.MethodPost, "/save", bytes.NewReader([]byte(input)))
+			// NoError проверяет, что функция не вернула ошибку.
 			require.NoError(t, err)
 
 			rr := httptest.NewRecorder()
 			handler.ServeHTTP(rr, req)
 
+			//Equal производит сравнение двух значений
 			require.Equal(t, rr.Code, http.StatusOK)
 
 			body := rr.Body.String()
 
 			var resp save.Response
-
+			// NoError проверяет, что функция не вернула ошибку.
 			require.NoError(t, json.Unmarshal([]byte(body), &resp))
-
+			//Equal производит сравнение двух значений
 			require.Equal(t, tc.respError, resp.Error)
 
 			// TODO: add more checks
