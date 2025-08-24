@@ -15,13 +15,14 @@ type Storage struct {
 }
 
 func New(storagePath string) (*Storage, error) {
-	const op = "storage.sqlite.New"
+	const op = "storage.sqlite.New" // Имя текущей функции для логов и ошибок
 
-	db, err := sql.Open("sqlite3", storagePath)
+	db, err := sql.Open("sqlite3", storagePath) // Подключаемся к БД
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
+	// Создаем таблицу, если ее еще нет
 	stmt, err := db.Prepare(`
 	CREATE TABLE IF NOT EXISTS url(
 		id INTEGER PRIMARY KEY,
