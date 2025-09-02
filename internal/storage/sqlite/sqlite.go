@@ -17,12 +17,13 @@ type Storage struct {
 func New(storagePath string) (*Storage, error) {
 	const op = "storage.sqlite.New" // Имя текущей функции для логов и ошибок
 
-	db, err := sql.Open("sqlite3", storagePath) // Подключаемся к БД
+	// 1. Подключаемся к БД
+	db, err := sql.Open("sqlite3", storagePath)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	// Создаем таблицу, если ее еще нет
+	// 2. Создаем таблицу, если ее еще нет
 	stmt, err := db.Prepare(`
 	CREATE TABLE IF NOT EXISTS url(
 		id INTEGER PRIMARY KEY,
@@ -77,6 +78,7 @@ func (s *Storage) GetURL(alias string) (string, error) {
 
 	var resURL string
 
+	// 3. Scan() "переводит" полученные данные в GO-типы
 	err = stmt.QueryRow(alias).Scan(&resURL)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
