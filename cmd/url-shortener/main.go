@@ -106,7 +106,7 @@ func main() {
 	<-done
 	log.Info("stopping server")
 
-	// 4️⃣ Корректное завершение с таймаутом (Shutdown и context.WithTimeout)
+	// 4️⃣ Корректное завершение с таймаутом (context.WithTimeout и Shutdown)
 	// context.WithTimeout: Создает контекст, который автоматически отменится через 10 секунд.
 	// Это наша "страховка" от зависания сервера.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
