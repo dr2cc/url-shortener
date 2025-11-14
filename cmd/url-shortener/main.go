@@ -66,9 +66,21 @@ func main() {
 
 	log.Info("starting server", slog.String("address", cfg.Address))
 
+	// ❗graceful shutdown
+
+	// Анализ  от google:
+	// 1️⃣ Инициализация канала сигналов (done)
+	// done: Это наш "стоп-кран".
+	// Это буферизованный канал, который будет ожидать системные сигналы.
 	done := make(chan os.Signal, 1)
+	// signal.Notify: Регистрирует канал done для получения уведомлений,
+	// когда операционная система отправляет сигналы прерывания (Ctrl+C),
+	// SIGINT или SIGTERM (используется в Docker, Kubernetes, systemd для завершения процессов).
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
+	// 2️⃣ Конфигурация и запуск сервера
+	// http.Server: Сервер корректно сконфигурирован с таймаутами для чтения/записи,
+	// что очень важно для продакшена.
 	srv := &http.Server{
 		Addr:         cfg.Address,
 		Handler:      router,
@@ -77,6 +89,8 @@ func main() {
 		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
 	}
 
+	// Отдельная горутина: Сервер запускается в своей собственной горутине.
+	// Это необходимо, так как ListenAndServe() является блокирующим вызовом.
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
 			log.Error("failed to start server")
@@ -85,16 +99,29 @@ func main() {
 
 	log.Info("server started")
 
+	// 3️⃣ Ожидание сигнала остановки
+	// <-done: Это критическая точка синхронизации. Основная горутина main блокируется здесь.
+	// Она будет ждать, пока в канал done не придет системный сигнал.
+	// Как только пользователь нажимает Ctrl+C, канал разблокируется, и выполнение продолжается.
 	<-done
 	log.Info("stopping server")
 
-	// TODO: move timeout to config
+	// 4️⃣ Корректное завершение с таймаутом (Shutdown и context.WithTimeout)
+	// context.WithTimeout: Создает контекст, который автоматически отменится через 10 секунд.
+	// Это наша "страховка" от зависания сервера.
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// TODO: move timeout to config
+
+	// Всегда нужно отменять контекст, чтобы освободить его ресурсы
 	defer cancel()
 
+	// srv.Shutdown(ctx): Вызывает изящное (graceful) завершение работы.
+	// Он перестает принимать новые запросы, но дает активным запросам время завершиться.
+	// Он использует канал <-ctx.Done() (который находится внутри ctx), чтобы узнать, когда истечет 10-секундный лимит.
 	if err := srv.Shutdown(ctx); err != nil {
+		// Обработка ошибок: Если Shutdown возвращает ошибку
+		// (обычно context deadline exceeded), это логируется.
 		log.Error("failed to stop server", sl.Err(err))
-
 		return
 	}
 
