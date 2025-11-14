@@ -66,7 +66,7 @@ func main() {
 
 	log.Info("starting server", slog.String("address", cfg.Address))
 
-	// ❗graceful shutdown
+	// ❗Graceful shutdown
 
 	// Анализ  от google:
 	// 1️⃣ Инициализация канала сигналов (done)
