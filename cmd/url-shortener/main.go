@@ -22,6 +22,7 @@ import (
 )
 
 const (
+	// При выборе env: "local" (в prod.yaml) логгер делает сообщения подробными и цветными (slogpretty)
 	envLocal = "local"
 	envDev   = "dev"
 	envProd  = "prod"

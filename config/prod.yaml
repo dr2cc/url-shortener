@@ -1,7 +1,9 @@
-env: "prod"
+# При выборе env: "local" логгер делает сообщения подробными и цветными
+env: "local" #"prod"
 storage_path: "./storage.db"
 http_server:
   address: "0.0.0.0:8082"
   timeout: 4s
   idle_timeout: 30s
   user: "Shabby8574"
+  password: "1234"
